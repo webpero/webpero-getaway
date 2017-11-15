@@ -14,6 +14,7 @@ import './App.css';
 
 /* Key for webpero github & webpero heroku */
 const googleKey = "AIzaSyAL58Of35Vjc2CeUAbSPXc1zd1ugUmYL4Q";
+const googleLocationKey = "AIzaSyCUb7lLbMRJkweAbcXiS3ejObHqnlDkKOQ";
 
 /* 
 	Komponent for Google Maps: react-google-maps
@@ -249,7 +250,7 @@ class App extends Component {
 			url: 'https://maps.googleapis.com/maps/api/geocode/json',
 			data: {	
 				address: query,
-				key: googleKey,						
+				key: googleLocationKey,						
 			},
 			success: (response) => {
 				if ( response.results[0] !== undefined ) {
