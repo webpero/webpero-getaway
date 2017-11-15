@@ -2,25 +2,17 @@
  * Forutsetter bruk av Bootstrap 3
  *
  * Per Olav Mariussen
- * 07.11.2017
+ * 15.11.2017
  */
 @import 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css';
 @import 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css';
 
-#info {
-	min-height: 400px;
-} 
 #image {
 	max-height: 400px;
 	max-width: 100%;
 }
 #submit {
 	margin-left: 15px;
-}
-/* Kartet */
-#map {
-	height: 400px;
-	width: 468px;  	/* Samme bredde som varselet fra yr (fast bredde) */
 }
 #yr {
 	margin-top: 15px;
@@ -35,4 +27,9 @@
 }
 .navbar-default .navbar-nav>li>a {
 	color: #555;
+}
+footer {
+	margin-top: 1em;
+	text-align: center;
+	font-size: 80%;
 }

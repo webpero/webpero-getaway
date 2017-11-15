@@ -67,10 +67,8 @@ class Info extends Component
 	render() {
 		$("#heading").html(this.props.heading);
 		return(
-			<p>
-				<a href={this.props.infoUrl} target='_blank'><img id='image' src={this.props.picUrl} alt={this.props.heading} /></a><br/>
-				{this.props.text}
-			</p>
+			<p><a href={this.props.infoUrl} target='_blank'><img id='image' src={this.props.picUrl} alt={this.props.heading} /></a></p>
+			<p>{this.props.text}</p>
 		);
 	}
 }
@@ -135,21 +133,21 @@ class App extends Component {
 	render() {
 		return (
 			<div className="container margin-top">
-				<div class="row">
-					<div class="col-lg-5">
+				<div className="row">
+					<div className="col-lg-5">
 						<h2>Hvor vil du dra?</h2>
 						<InputForm getInfo={this._getInfo.bind(this)} getVaer={this._getVaer.bind(this)} getPos={this._getPos.bind(this)} />
 					</div>
-					<div class="col-lg-7">
+					<div className="col-lg-7">
 						<h2 id="heading"></h2>
 					</div>
 				</div>
-				<div class="row">
-					<div class="col-lg-5">
+				<div className="row">
+					<div className="col-lg-5">
 						<Kart pos={this.state.kart.pos} zoom={this.state.kart.zoom} text={this.state.kart.text} />
 						<Vaer url={this.state.vaer.url} />
 					</div>
-					<div class="col-lg-7">
+					<div className="col-lg-7">
 						<Info heading={this.state.info.heading} text={this.state.info.text} picUrl={this.state.info.picUrl} infoUrl={this.state.info.infoUrl} />
 					</div>
 				</div>  	
