@@ -1,3 +1,9 @@
+/*
+ *	Ferieplanlegger React - Versjon 0.9.1
+ *	15.11.2017: Per Olav Mariussen
+ *
+ */
+ 
 import React, { Component } from 'react';
 import { compose, withProps } from "recompose"
 import $ from 'jquery';
@@ -6,16 +12,17 @@ import { withScriptjs, withGoogleMap, GoogleMap, Marker } from "react-google-map
 
 import './App.css';
 
+/* Key for webpero github & webpero heroku */
+const googleKey = "AIzaSyAL58Of35Vjc2CeUAbSPXc1zd1ugUmYL4Q";
+
 /* 
-	Komponent for Google Maps 
+	Komponent for Google Maps: react-google-maps
 	https://tomchentw.github.io/react-google-maps
 */
 const MyMap = 
 	compose(
 		withProps({
-			googleMapURL: "https://maps.googleapis.com/maps/api/js?key=AIzaSyCUb7lLbMRJkweAbcXiS3ejObHqnlDkKOQ&v=3.exp&libraries=geometry",
-			/* Produksjon: AIzaSyAL58Of35Vjc2CeUAbSPXc1zd1ugUmYL4Q */
-			/* Test: AIzaSyCUb7lLbMRJkweAbcXiS3ejObHqnlDkKOQ */
+			googleMapURL: "https://maps.googleapis.com/maps/api/js?key="+googleKey+"&v=3.exp&libraries=geometry",
 			loadingElement: <div style={{ height: `100%` }} />,
 			containerElement: <div style={{ height: `400px`, width: `468px` }} />,
 			mapElement: <div style={{ height: `100%` }} />
@@ -88,7 +95,6 @@ class Vaer extends Component
 class Kart extends React.PureComponent
 {
   _handleMarkerClick = () => {
-
   }
 
   render() {
@@ -119,7 +125,7 @@ class App extends Component {
 				url: ""
 			},
 			kart: {
-				pos: {lat:59.913, lng:10.752},
+				pos: {lat:59.913, lng:10.752},	// Oslo
 				zoom: 4,
 				text: ""
 			}
@@ -163,8 +169,7 @@ class App extends Component {
 			data: {	
 				q: query,											// Søkestrengen
 				cx: '018034702328520342012:y80oci2ue2i',			// CSE: webpero-getaway 
-				/*key: 'AIzaSyAL58Of35Vjc2CeUAbSPXc1zd1ugUmYL4Q',	// Google API-key for github&heroku */
-				key: 'AIzaSyCUb7lLbMRJkweAbcXiS3ejObHqnlDkKOQ',		// Google API-key for test				
+				key: googleKey,						
 				num: 1
 			},
 			success: (response) => {
@@ -207,8 +212,7 @@ class App extends Component {
 			data: {	
 				q: query,											// Søkestrengen (sted)
 				cx: '018034702328520342012:701p_fuzpji',			// CSE: webpero-ferieplanlegger-yr
-				/*key: 'AIzaSyAL58Of35Vjc2CeUAbSPXc1zd1ugUmYL4Q',	// Google API-key for github&heroku */
-				key: 'AIzaSyCUb7lLbMRJkweAbcXiS3ejObHqnlDkKOQ',		// Google API-key for test				
+				key: googleKey,						
 				num: 1												// Hent bare ett treff
 			},
 			success: (response) => {
@@ -245,8 +249,7 @@ class App extends Component {
 			url: 'https://maps.googleapis.com/maps/api/geocode/json',
 			data: {	
 				address: query,
-				/*key: 'AIzaSyAL58Of35Vjc2CeUAbSPXc1zd1ugUmYL4Q',	// Google API-key for github&heroku */
-				key: 'AIzaSyCUb7lLbMRJkweAbcXiS3ejObHqnlDkKOQ',		// Google API-key for test				
+				key: googleKey,						
 			},
 			success: (response) => {
 				if ( response.results[0] !== undefined ) {
