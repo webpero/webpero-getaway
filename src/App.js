@@ -67,8 +67,10 @@ class Info extends Component
 	render() {
 		$("#heading").html(this.props.heading);
 		return(
-			<p><a href={this.props.infoUrl} target='_blank'><img id='image' src={this.props.picUrl} alt={this.props.heading} /></a></p>
-			<p>{this.props.text}</p>
+			<div>
+				<p><a href={this.props.infoUrl} target='_blank'><img id='image' src={this.props.picUrl} alt={this.props.heading} /></a></p>
+				<p>{this.props.text}</p>
+			</div>
 		);
 	}
 }
