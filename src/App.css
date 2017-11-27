@@ -28,6 +28,9 @@
 .navbar-default .navbar-nav>li>a {
 	color: #555;
 }
+button {
+	margin-right: 10px;
+}
 footer {
 	margin-top: 1em;
 	text-align: center;
