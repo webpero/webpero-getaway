@@ -1,6 +1,6 @@
 /*
- *	Ferieplanlegger React - Versjon 0.9.1
- *	15.11.2017: Per Olav Mariussen
+ *	Ferieplanlegger React - Versjon 0.9.5
+ *	27.11.2017: Per Olav Mariussen
  *
  */
  
@@ -39,63 +39,11 @@ const MyMap =
 		</GoogleMap>
 	);
 
-
-/* Komponent for brukerinput (søk) */
-class InputForm extends Component {
-	render(){
-		return(
-			<form className="form" id="query-form" onSubmit={this._handleSubmit.bind(this)}>
-				<div className="form-group">
-					<input type="text" placeholder="Sted/by" size="40" ref={(input) => this._query = input}/>
-					<button id="submit" className='btn btn-primary btn-md'>getaway&nbsp;<span className='glyphicon glyphicon-chevron-right'></span></button>
-				</div>
-			</form>
-		);
-	}
-	
-	_handleSubmit(ev) {
-		ev.preventDefault();
-		let query = this._query;
-		this.props.getInfo(query.value);
-		this.props.getVaer(query.value);
-		this.props.getPos(query.value);
-	}
-}
-
-/* Komponent for visning av info om angitt sted (sendes via props) */
-class Info extends Component 
-{
-	render() {
-		$("#heading").html(this.props.heading);
-		return(
-			<div>
-				<p><a href={this.props.infoUrl} target='_blank'><img id='image' src={this.props.picUrl} alt={this.props.heading} /></a></p>
-				<p>{this.props.text}</p>
-			</div>
-		);
-	}
-}
-
-/* Komponent for visning av varsel fra Yr */
-class Vaer extends Component 
-{
-	render() {
-		if ( this.props.url !== undefined && this.props.url.length > 2 ) {
-			return( 
-				<iframe id="yr" title="yr" src={this.props.url+'ekstern_boks_tre_dager.html'} width="468" height="290" frameBorder="0" scrolling="no"></iframe>
-			);
-		} else {
-			return(
-				<p></p>
-			);
-		}
-	}
-}
-
 /* Komponent for visning av sted på kartet */
 class Kart extends React.PureComponent
 {
   _handleMarkerClick = () => {
+	  /* her kommer det kode */
   }
 
   render() {
@@ -110,17 +58,116 @@ class Kart extends React.PureComponent
   }
 }
 
-/* Selve applikasjonen (eksporteres) */
-class App extends Component {
 
+/* Komponent for visning av info om angitt sted (sendes via props) */
+class Info extends Component
+{
+	constructor(props) {
+		super(props);
+		this._handleClickForrige = this._handleClickForrige.bind(this);
+		this._handleClickNeste = this._handleClickNeste.bind(this);
+	}
+
+	/* Beregn ny index når bruker klikker på forrige */
+	_handleClickForrige(ev) {
+		let index = this.props.info.index - 1;
+		ev.preventDefault();
+		if ( index < 0 ) {
+			index = this.props.info.count - 1;
+		}
+		this.props.onIndexChange(index);	//Send ny index opp til parent
+	}
+	
+	/* Beregn ny index når bruker klikker på neste */
+	_handleClickNeste(ev) {
+		let index = this.props.info.index + 1;
+		ev.preventDefault();
+		if ( index >= this.props.info.count ) {
+			index = 0;
+		}
+		this.props.onIndexChange(index); //Send ny index opp til parent
+	}	
+	
+	render() {
+		const el = this.props.info.content[this.props.info.index]; 	//Info som skal vises settes lik aktuelt element fra content-tabellen
+		
+		if ( el !== undefined && el.heading !== undefined && el.heading.length > 0 ) {
+			$("#heading").html(el.heading);	
+		} else {
+			$("#heading").html("Ingen treff");	
+		}
+		return(
+			<div>
+				{ el !== undefined && el.heading !== undefined && el.infoUrl.length > 0 &&
+					<div>
+						<p>
+							<button className='btn btn-default btn-md' onClick={this._handleClickForrige}><span className='glyphicon glyphicon-chevron-left'></span>&nbsp;Forrige</button>
+							<button className='btn btn-default btn-md' onClick={this._handleClickNeste}>Neste&nbsp;<span className='glyphicon glyphicon-chevron-right'></span></button>
+						</p>
+						<p><a href={el.infoUrl} target='_blank'><img id='image' src={el.picUrl} alt={el.heading} /></a></p>
+						<p>{el.text}</p>
+					</div>
+				}
+			</div>
+		);
+	}
+}
+
+
+/* Komponent for visning av varsel fra Yr */
+function Vaer( props )
+{
+	if ( props.url !== undefined && props.url.length > 2 ) {
+		return( 
+			<iframe id="yr" title="yr" src={props.url+'ekstern_boks_tre_dager.html'} width="468" height="290" frameBorder="0" scrolling="no"></iframe>
+		);
+	} else {
+		return(
+			<p></p>
+		);
+	}
+}
+
+
+/* Komponent for brukerinput (søk) */
+class InputForm extends Component 
+{
+	render() {
+		return(
+			<form className="form" id="query-form" onSubmit={this._handleSubmit.bind(this)}>
+				<div className="form-group">
+					<input type="text" placeholder="Sted/by" size="40" ref={(input) => this._query = input}/>
+					<button id="submit" className='btn btn-primary btn-md'>getaway&nbsp;<span className='glyphicon glyphicon-chevron-right'></span></button>
+				</div>
+			</form>
+		);
+	}
+	
+	_handleSubmit(ev) {
+		let query = this._query;
+		ev.preventDefault();
+		this.props.getInfo(query.value);
+		this.props.getVaer(query.value);
+		this.props.getPos(query.value);
+	}
+}
+
+
+/* Selve applikasjonen (eksporteres) */
+class App extends Component 
+{
 	constructor() {
 		super();
 		this.state = {
 			info: {
-				heading: "",
-				text: "",
-				picUrl: "",
-				infoUrl: ""
+				count: 0,
+				index: 0,
+				content: [{
+					heading: "",
+					text: "",
+					picUrl: "",
+					infoUrl: ""
+				}]
 			},
 			vaer: {
 				url: ""
@@ -131,6 +178,13 @@ class App extends Component {
 				text: ""
 			}
 		};
+	}
+	
+	/* Sett index på aktuelt element i info-array */
+	_changeIndex( index ) {
+		let info = this.state.info;
+		info.index = index;
+		this.setState( {info} );
 	}
 	
 	render() {
@@ -151,7 +205,7 @@ class App extends Component {
 						<Vaer url={this.state.vaer.url} />
 					</div>
 					<div className="col-lg-7">
-						<Info heading={this.state.info.heading} text={this.state.info.text} picUrl={this.state.info.picUrl} infoUrl={this.state.info.infoUrl} />
+						<Info info={this.state.info} onIndexChange={this._changeIndex.bind(this)} />
 					</div>
 				</div>  	
 			</div>
@@ -161,8 +215,14 @@ class App extends Component {
 	/* Utfør søk etter info om sted (query) og lagre data i state */
 	_getInfo( query ) 
 	{
-		let res = {},
-			info = {};
+		const antall = 10;	// Antall treff som skal hentes
+		let res = {},		// Lokalt resultat-objekt fra søket
+			info = { 		// Info-objekt som skal lagres i state
+				count: 0,
+				index: 0,
+				content: []
+			},
+			el;				// Lokalt element som skal legges til i content-array i info-objektet
 			
 		$.ajax({
 			url: 'https://www.googleapis.com/customsearch/v1',
@@ -171,7 +231,7 @@ class App extends Component {
 				q: query,											// Søkestrengen
 				cx: '018034702328520342012:y80oci2ue2i',			// CSE: webpero-getaway 
 				key: googleKey,						
-				num: 1
+				num: antall
 			},
 			success: (response) => {
 				if ( response.error !== undefined ) {
@@ -181,18 +241,24 @@ class App extends Component {
 				else {
 					if( response.searchInformation !== undefined && response.searchInformation.totalResults > 0 ) {
 						/* Minst ett treff, gå igjennom resultatene og sjekk om nødvendige data finnes før de legges inn i data-tabellen */
-						if ( response.items[0] !== undefined ) {
-							res = response.items[0];
-							if ( res.pagemap !== undefined && res.pagemap.cse_image !== undefined  ) {
-								/* Nødvendige data finnes i resultat-elementet (res) */
-								info.heading = res.title;
-								info.text = res.snippet;
-								info.picUrl = res.pagemap.cse_image[0].src;
-								info.infoUrl = res.formattedUrl;
-								this.setState({ info });
+						for ( var i = 0; i < antall; i++ ) {
+							if ( response.items[i] !== undefined ) {
+								res = response.items[i];
+								if ( res.pagemap !== undefined && res.pagemap.cse_image !== undefined  ) {
+									/* Nødvendige data finnes i resultat-elementet (res) */
+									el = {};
+									el.heading = res.title;
+									el.text = res.snippet;
+									el.picUrl = res.pagemap.cse_image[0].src;
+									el.infoUrl = res.formattedUrl;
+									info.content.push(el);
+									info.count++;
+								}
 							}
 						}
 					}
+					/* Sett info i state. Ingen treff vil blanke ut eventuelle tidligere data */
+					this.setState({ info });
 				}
 			},
 			error: function(response) {
@@ -223,16 +289,17 @@ class App extends Component {
 				}
 				else {
 					if( response.searchInformation !== undefined && response.searchInformation.totalResults > 0 ) {
-						/* Minst ett treff, gå igjennom resultatene og sjekk om nødvendige bildedata finnes før de legges inn i data-tabellen */
+						/* Ett treff, sjekk om nødvendige data finnes før de legges inn */
 						if ( response.items[0] !== undefined ) {
 							res = response.items[0];
 							if ( res.pagemap !== undefined && res.pagemap.metatags[0] !== undefined ) {
 								/* Hent ut URL til aktuelt sted */
 								vaer.url = res.pagemap.metatags[0]["lp:url"];
-								this.setState({ vaer });
 							}
 						}
 					}
+					/* Sett værdata i state. Ingen treff vil blanke ut eventuelle tidligere data */
+					this.setState({ vaer });
 				}
 			},
 			error: function(response) {
