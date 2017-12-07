@@ -1,133 +1,18 @@
 /*
- *	Ferieplanlegger React - Versjon 0.9.5
- *	27.11.2017: Per Olav Mariussen
+ *	Ferieplanlegger React - Versjon 0.9.6
+ *	01.12.2017: Per Olav Mariussen
  *
  */
  
 import React, { Component } from 'react';
-import { compose, withProps } from "recompose"
 import $ from 'jquery';
-import { Navbar, Jumbotron, Button } from 'react-bootstrap';
-import { withScriptjs, withGoogleMap, GoogleMap, Marker } from "react-google-maps"
+
+import webpero from './webpero.js';
+import Info from './Info.js';
+import Kart from './map.js';
+import Vaer from './Vaer.js';
 
 import './App.css';
-
-/* Key for webpero github & webpero heroku */
-const googleKey = "AIzaSyAL58Of35Vjc2CeUAbSPXc1zd1ugUmYL4Q";
-const googleLocationKey = "AIzaSyCUb7lLbMRJkweAbcXiS3ejObHqnlDkKOQ";
-
-/* 
-	Komponent for Google Maps: react-google-maps
-	https://tomchentw.github.io/react-google-maps
-*/
-const MyMap = 
-	compose(
-		withProps({
-			googleMapURL: "https://maps.googleapis.com/maps/api/js?key="+googleKey+"&v=3.exp&libraries=geometry",
-			loadingElement: <div style={{ height: `100%` }} />,
-			containerElement: <div style={{ height: `400px`, width: `468px` }} />,
-			mapElement: <div style={{ height: `100%` }} />
-		}),
-		withScriptjs,
-		withGoogleMap
-	)((props) => 
-		<GoogleMap
-			zoom={props.zoom}
-			ref={(map) => map && map.panTo(props.center)} 
-		>
-			{props.isMarkerShown && <Marker position={props.center} onClick={props.onMarkerClick} />}
-		</GoogleMap>
-	);
-
-/* Komponent for visning av sted på kartet */
-class Kart extends React.PureComponent
-{
-  _handleMarkerClick = () => {
-	  /* her kommer det kode */
-  }
-
-  render() {
-    return (
-      <MyMap
-        isMarkerShownPos={this.props.pos !== {}}
-		zoom={this.props.zoom}
-		center={this.props.pos}
-        onMarkerClick={this._handleMarkerClick}
-      />
-    )
-  }
-}
-
-
-/* Komponent for visning av info om angitt sted (sendes via props) */
-class Info extends Component
-{
-	constructor(props) {
-		super(props);
-		this._handleClickForrige = this._handleClickForrige.bind(this);
-		this._handleClickNeste = this._handleClickNeste.bind(this);
-	}
-
-	/* Beregn ny index når bruker klikker på forrige */
-	_handleClickForrige(ev) {
-		let index = this.props.info.index - 1;
-		ev.preventDefault();
-		if ( index < 0 ) {
-			index = this.props.info.count - 1;
-		}
-		this.props.onIndexChange(index);	//Send ny index opp til parent
-	}
-	
-	/* Beregn ny index når bruker klikker på neste */
-	_handleClickNeste(ev) {
-		let index = this.props.info.index + 1;
-		ev.preventDefault();
-		if ( index >= this.props.info.count ) {
-			index = 0;
-		}
-		this.props.onIndexChange(index); //Send ny index opp til parent
-	}	
-	
-	render() {
-		const el = this.props.info.content[this.props.info.index]; 	//Info som skal vises settes lik aktuelt element fra content-tabellen
-		
-		if ( el !== undefined && el.heading !== undefined && el.heading.length > 0 ) {
-			$("#heading").html(el.heading);	
-		} else {
-			$("#heading").html("Ingen treff");	
-		}
-		return(
-			<div>
-				{ el !== undefined && el.heading !== undefined && el.infoUrl.length > 0 &&
-					<div>
-						<p>
-							<button className='btn btn-default btn-md' onClick={this._handleClickForrige}><span className='glyphicon glyphicon-chevron-left'></span>&nbsp;Forrige</button>
-							<button className='btn btn-default btn-md' onClick={this._handleClickNeste}>Neste&nbsp;<span className='glyphicon glyphicon-chevron-right'></span></button>
-						</p>
-						<p><a href={el.infoUrl} target='_blank'><img id='image' src={el.picUrl} alt={el.heading} /></a></p>
-						<p>{el.text}</p>
-					</div>
-				}
-			</div>
-		);
-	}
-}
-
-
-/* Komponent for visning av varsel fra Yr */
-function Vaer( props )
-{
-	if ( props.url !== undefined && props.url.length > 2 ) {
-		return( 
-			<iframe id="yr" title="yr" src={props.url+'ekstern_boks_tre_dager.html'} width="468" height="290" frameBorder="0" scrolling="no"></iframe>
-		);
-	} else {
-		return(
-			<p></p>
-		);
-	}
-}
-
 
 /* Komponent for brukerinput (søk) */
 class InputForm extends Component 
@@ -151,7 +36,6 @@ class InputForm extends Component
 		this.props.getPos(query.value);
 	}
 }
-
 
 /* Selve applikasjonen (eksporteres) */
 class App extends Component 
@@ -215,14 +99,13 @@ class App extends Component
 	/* Utfør søk etter info om sted (query) og lagre data i state */
 	_getInfo( query ) 
 	{
-		const antall = 10;	// Antall treff som skal hentes
-		let res = {},		// Lokalt resultat-objekt fra søket
-			info = { 		// Info-objekt som skal lagres i state
+		let res = {},
+			info = { 
 				count: 0,
 				index: 0,
 				content: []
 			},
-			el;				// Lokalt element som skal legges til i content-array i info-objektet
+			el;
 			
 		$.ajax({
 			url: 'https://www.googleapis.com/customsearch/v1',
@@ -230,8 +113,8 @@ class App extends Component
 			data: {	
 				q: query,											// Søkestrengen
 				cx: '018034702328520342012:y80oci2ue2i',			// CSE: webpero-getaway 
-				key: googleKey,						
-				num: antall
+				key: webpero.googleKey(),						
+				num: 10
 			},
 			success: (response) => {
 				if ( response.error !== undefined ) {
@@ -241,7 +124,7 @@ class App extends Component
 				else {
 					if( response.searchInformation !== undefined && response.searchInformation.totalResults > 0 ) {
 						/* Minst ett treff, gå igjennom resultatene og sjekk om nødvendige data finnes før de legges inn i data-tabellen */
-						for ( var i = 0; i < antall; i++ ) {
+						for ( var i = 0; i < 10; i++ ) {
 							if ( response.items[i] !== undefined ) {
 								res = response.items[i];
 								if ( res.pagemap !== undefined && res.pagemap.cse_image !== undefined  ) {
@@ -258,7 +141,7 @@ class App extends Component
 						}
 					}
 					/* Sett info i state. Ingen treff vil blanke ut eventuelle tidligere data */
-					this.setState({ info });
+					this.setState({ info });				
 				}
 			},
 			error: function(response) {
@@ -279,7 +162,7 @@ class App extends Component
 			data: {	
 				q: query,											// Søkestrengen (sted)
 				cx: '018034702328520342012:701p_fuzpji',			// CSE: webpero-ferieplanlegger-yr
-				key: googleKey,						
+				key: webpero.googleKey(),						
 				num: 1												// Hent bare ett treff
 			},
 			success: (response) => {
@@ -298,9 +181,8 @@ class App extends Component
 							}
 						}
 					}
-					/* Sett værdata i state. Ingen treff vil blanke ut eventuelle tidligere data */
-					this.setState({ vaer });
-				}
+					/* Sett info i state. Ingen treff vil blanke ut eventuelle tidligere data */
+					this.setState({ vaer });				}
 			},
 			error: function(response) {
 				console.log("Error: "+(response.error !== undefined ? response.error.errors[0].reason : "Ukjent feil!") );
@@ -317,7 +199,7 @@ class App extends Component
 			url: 'https://maps.googleapis.com/maps/api/geocode/json',
 			data: {	
 				address: query,
-				key: googleLocationKey,						
+				key: webpero.googleLocKey(),						
 			},
 			success: (response) => {
 				if ( response.results[0] !== undefined ) {
